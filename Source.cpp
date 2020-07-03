@@ -2,11 +2,9 @@
 
 #include "DxLib.h"
 #include <stdio.h>
-
-#define PI 3.141592654
-#define TAMA_MAX	256
-
-int Key[256]; // キーが押されているフレーム数を格納する
+#include "Header.h"
+#include "player1.h"
+#include "player2.h"
 
 //#####################出来たらいいなリスト#################################
 //まずは上下のみ動かせる横スペースインベーダー
@@ -38,83 +36,12 @@ int Key[256]; // キーが押されているフレーム数を格納する
 //シングルモード追加
 //スコアアタック
 
-//ゲーム画面
-enum GAME_SCENE {
-	scene_start,	//スタート画面 0
-	scene_ready,	//装備選択画面 1
-	scene_game,		//ゲーム画面 2
-	scene_end		//エンド画面 3
-};
 
-//弾の種類を判別
-enum TAMA_KIND {//列挙型、上から順に0.1.2.3.4...と数字を与えられる　途中から別の数字を代入することも可能
-	Redtama1,
-	Redtama2,
-	Bluebomb1,
-	Bluebomb2,
-	Bluebomb3,
-	Bluebomb4,
-	Bluebomb5,
-	Bluebomb6,
-	Bluebomb7,
-	Bluebomb8,
-	Bluebomb9,
-	Bluebomb10,
-	Bluebomb11,
-	Redtama3,
-	TAMA_KIND_END	//弾の種類の最大値
-};
-
-enum LOCK_ON//ロックオン画像の
-{
-	lockon1,
-	lockon2,
-	lockon3
-};
-struct TAMA//弾の構造体
-{
-	int x;
-	int y;
-	int houkou;//方向
-	int countA;//時間の保存先
-	int countB = 11;//爆発エフェクトの数字
-	BOOL IsView;//弾の表示非表示
-	int dansoku;//弾速
-	int shotmode;//弾ごとの弾種データ
-	int Angle;
-
-	int handle[(int)TAMA_KIND_END];	//弾の画像のハンドル
-	int Width[(int)TAMA_KIND_END];	//弾の幅
-	int Height[(int)TAMA_KIND_END];	//弾の高さ
-};
-TAMA tama_init;	//弾の画像読み込み・初期化のために使う変数
-TAMA tama[TAMA_MAX];//構造体の配列
-
-struct PLAYER//自機の構造体
-{
-	int HP = 100;
-	int Handle;	//画像格納用ハンドル
-	int x;
-	int y;
-	int Width;
-	int Height;
-};
-PLAYER player;//構造体の変数
-
-int Redtama1_dansuu = 15;
-int Redtama2_dansuu = 30;
-int Bluebomb1_dansuu = 5;//1で止めるためこれで5発 
-struct LOCKON//ロックオン画像の
-{
-	int Handle[3];
-	int Width[3];
-	int Height[3];
-};
-LOCKON lockon;
+int Key[256]; // キーが押されているフレーム数を格納する
 
 int HP;//HPバー画像格納用ハンドル
-int yajirusi_2;//矢印画像格納用ハンドル
-int yajirusi_3;//矢印画像格納用ハンドル
+int yajirusi_2;//自機前方向矢印画像格納用ハンドル
+int yajirusi_3;//状態表示方向矢印画像格納用ハンドル
 
 int Redtama1_sound;
 int Redtama2_sound;
@@ -124,132 +51,17 @@ int reload_sound;
 int Pad1;        //ジョイパッドの入力状態格納用変数
 int Pad2;        //ジョイパッドの入力状態格納用変数
 
-
-
-//プロトタイプ宣言
-VOID START_GAMEN(VOID);//スタート画面
-VOID READY_GAMEN(VOID);//準備画面
-VOID GAME_GAMEN(VOID);//ゲーム画面
-VOID END_GAMEN(VOID);//エンド画面
-
-VOID JOUTAI_HYOUJI(VOID);//状態表示
-VOID DANSUU(VOID);//弾数
-VOID IDOU_SOUSA(VOID);//移動操作
-VOID SHOT_MODE(VOID);//弾種
-VOID SHOT_KYODOU(VOID);//弾の挙動
-VOID PLAYER_HYOUJI(VOID);
-VOID GAZOU_YOMIKOMI(VOID);
-VOID PAD_SOUSA(VOID);
-BOOL ATARI_HANTEI(RECT, RECT);
-BOOL ATARI_HANTEI2(RECT, RECT);
-
-BOOL A = FALSE;//弾が０の時射撃キーを押すたびにリロードに対する対策
-BOOL B = FALSE;//弾が０の時射撃キーを押すたびにリロードに対する対策
-BOOL C = FALSE;//弾が０の時射撃キーを押すたびにリロードに対する対策
-BOOL SHOT = FALSE;//パッドのボタン連射対策
-BOOL HOUKOU = FALSE;//パッドのボタン連射対策　右
-BOOL SHOTMODE = FALSE;//パッドのボタン連射対策　右
-BOOL RELOAD = FALSE;//パッドボタン連射対策　右
-BOOL DANSOKU = FALSE;
-BOOL HOUKOU_1 = FALSE;//パッドのボタン連射対策　左
-BOOL SHOTMODE_1 = FALSE;//パッドのボタン連射対策　左
-BOOL reload = FALSE;//リロード中か否か
-BOOL DAMAGE = FALSE;
 //変数の宣言
 int mode = (int)scene_start;//画面遷移
 int count = 0;//毎フレーム
-int countC;//リロードの時間格納用　５秒
-int i = 0;//個別の弾用の数字
-int shothoukou = 0;//弾の方向
 
-BOOL ue[256];//各弾が上端に当たったかどうか
-BOOL sita[256];//各弾が下端に当たったかどうか
-
-int dansoku = 2;//初期弾速
-int dansokumode = 0;//弾速の変更
 char dansokuhyouji[3] = "低";//画面に低中高速を表示するための 初期弾速：艇
-int shotmode = 0;//弾の種類　初期弾種：０
-int q = 0;
 
 //char modehyouji[5] = "通常";
 //char houkouhyouji[3] = "中";//画面に方向を表示するための　初期方向：中
 
 //##################▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ここから複製▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼########################
-struct TAMA_//弾の構造体
-{
-	int x;
-	int y;
-	int houkou;//方向
-	int countA;//時間の保存先
-	int countB = 11;//爆発エフェクトの数字
-	BOOL IsView;//弾の表示非表示
-	int dansoku;//弾速
-	int shotmode;//弾ごとの弾種データ
-	int Angle;
-
-	int handle[(int)TAMA_KIND_END];	//弾の画像のハンドル
-	int Width[(int)TAMA_KIND_END];	//弾の幅
-	int Height[(int)TAMA_KIND_END];	//弾の高さ
-};
-TAMA_ tama_init_;	//弾の画像読み込み・初期化のために使う変数
-TAMA_ tama_[TAMA_MAX];//構造体の配列
-
-struct PLAYER_//自機の構造体
-{
-	int HP = 100;
-	int Handle;	//画像格納用ハンドル
-	int x;
-	int y;
-	int Width;
-	int Height;
-};
-PLAYER_ player_;//構造体の変数
-
-int Redtama1_dansuu_ = 15;
-int Redtama2_dansuu_ = 30;
-int Bluebomb1_dansuu_ = 5;//1で止めるためこれで5発 
-
-VOID JOUTAI_HYOUJI_(VOID);//状態表示
-VOID DANSUU_(VOID);//弾数
-VOID IDOU_SOUSA_(VOID);//移動操作
-VOID SHOT_MODE_(VOID);//弾種
-VOID SHOT_KYODOU_(VOID);//弾の挙動
-VOID PLAYER_HYOUJI_(VOID);
-VOID GAZOU_YOMIKOMI_(VOID);
-VOID PAD_SOUSA(VOID);
-
-BOOL ATARI_HANTEI_(RECT, RECT);
-BOOL ATARI_HANTEI_2(RECT, RECT);
-
-BOOL A_ = FALSE;//弾が０の時射撃キーを押すたびにリロードに対する対策
-BOOL B_ = FALSE;//弾が０の時射撃キーを押すたびにリロードに対する対策
-BOOL C_ = FALSE;//弾が０の時射撃キーを押すたびにリロードに対する対策
-
-BOOL SHOT_ = FALSE;//パッドのボタン連射対策
-BOOL HOUKOU_ = FALSE;//パッドのボタン連射対策　右
-BOOL SHOTMODE_ = FALSE;//パッドのボタン連射対策　右
-BOOL RELOAD_ = FALSE;//パッドボタン連射対策　右
-BOOL DANSOKU_ = FALSE;
-BOOL HOUKOU_1_ = FALSE;//パッドのボタン連射対策　左
-BOOL SHOTMODE_1_ = FALSE;//パッドのボタン連射対策　左
-
-BOOL reload_ = FALSE;//リロード中か否か
-BOOL DAMAGE_ = FALSE;
-
-int countC_;//リロードの時間格納用　５秒
-int i_ = 0;//個別の弾用の数字
-
-BOOL ue_[256];//各弾が上端に当たったかどうか
-BOOL sita_[256];//各弾が下端に当たったかどうか
-
-int shothoukou_ = 0;//弾の方向
-int dansoku_ = 2;//初期弾速
-int dansokumode_ = 0;//弾速の変更
-int shotmode_ = 0;//弾の種類　初期弾種：０
-int q_ = 0;
-
 //##################▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ここまで複製▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲########################
-
 
 //キーの入力状態を更新する
 int gpUpdateKey() {
@@ -304,12 +116,8 @@ VOID START_GAMEN(VOID)
 	DrawFormatString(100, 100, GetColor(0, 255, 0), "スタート画面");
 	DrawFormatString(250, 250, GetColor(0, 255, 255), "PUSH TO ENTER");
 
-
-
-
 	if (Key[KEY_INPUT_RETURN] == 1 || (GetJoypadInputState(DX_INPUT_PAD1) & PAD_INPUT_3) != 0)//エンターキー
 	{
-
 		mode = (int)scene_ready;
 	}
 }
@@ -320,7 +128,6 @@ VOID READY_GAMEN(VOID)
 	{
 		mode = (int)scene_game;
 	}
-
 }
 
 //##################ゲーム画面の関数########################
@@ -362,7 +169,6 @@ VOID JOUTAI_HYOUJI(VOID)
 	DrawGraph(610, 370, lockon.Handle[(int)lockon2], TRUE);
 	DrawGraph(610, 442, lockon.Handle[(int)lockon3], TRUE);
 	DrawRotaGraph(625, 350, 0.8, 0, lockon.Handle[(int)lockon1], TRUE);
-
 
 	switch (shotmode)
 	{
@@ -623,7 +429,6 @@ VOID SHOT_MODE(VOID)
 			{
 				shothoukou = 0;
 			}
-
 		}
 	}
 	if ((GetJoypadInputState(DX_INPUT_PAD1) & PAD_INPUT_6) == 0)
@@ -635,7 +440,6 @@ VOID SHOT_MODE(VOID)
 	{
 		if (HOUKOU_1 == FALSE)
 		{
-
 			shothoukou--;
 			HOUKOU_1 = TRUE;
 			if (shothoukou == -1)
@@ -872,7 +676,6 @@ VOID SHOT_KYODOU(VOID)
 			{
 				if (tama[cnt].shotmode >= (int)Bluebomb1)	//爆発弾ならば
 				{
-					
 					if (tama[cnt].countB == 0)//爆発エフェクト
 					{
 						tama[cnt].IsView = FALSE;
@@ -1172,7 +975,6 @@ VOID PAD_SOUSA(VOID)
 			DrawFormatString(0, i * 15, GetColor(255, 255, 255), "%dのキーが押されています", i);
 		}
 	}
-
 }
 //##################▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ここから複製▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼########################
 //##################▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ここから複製▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼########################
@@ -1280,14 +1082,12 @@ VOID JOUTAI_HYOUJI_(VOID)
 	//DrawFormatString(10, 90, GetColor(0, 255, 0), "爆発弾:%d", Bluebomb1_dansuu_);//フレ＾ムカウント
 	//DrawFormatString(10, 105, GetColor(0, 255, 0), "%d", q);//フレ＾ムカウント
 	//DrawFormatString(10, 120, GetColor(0, 255, 0), "%d", DAMAGE);//フレ＾ムカウント
-
 }
 //##################弾数の関数########################
 VOID DANSUU_(VOID)//リロード中に撃っても弾を消費するだけで弾は出ないぞ！　←　これを利用して重ねリロードできるｿﾞ
 {
 	if (reload_ == TRUE)
 	{
-
 		tama_[i_].IsView = FALSE;
 		if (countC_ < count && Redtama1_dansuu_ < 1)//5秒たったら
 		{
@@ -1363,18 +1163,6 @@ VOID DANSUU_(VOID)//リロード中に撃っても弾を消費するだけで弾は出ないぞ！　←　こ
 		RELOAD_ = FALSE;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //##################移動操作の関数########################
