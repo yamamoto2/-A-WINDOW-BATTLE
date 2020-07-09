@@ -51,4 +51,3 @@ int dansoku = 2;//‰Šú’e‘¬
 int dansokumode = 0;//’e‘¬‚Ì•ÏX
 int shotmode = 0;//’e‚Ìí—Ş@‰Šú’eíF‚O
 int q = 0;
-

@@ -181,20 +181,20 @@ VOID JOUTAI_HYOUJI(VOID)
 		DrawRotaGraph(625, 457, 1.0, 1.0, tama_init.handle[(int)Bluebomb1], TRUE);
 		break;
 	case 1:
-		DrawRotaFormatString(625, 440, 1.0, 1.0, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE, "%d", Bluebomb1_dansuu);
-		DrawRotaFormatString(628, 400, 0.75, 0.75, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE, "%d", Redtama1_dansuu);
-		DrawRotaFormatString(628, 467, 0.75, 0.75, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE, "%d", Redtama2_dansuu);
-		DrawRotaGraph(625, 385, 1.0, 1.0, tama_init.handle[(int)Redtama1], TRUE);
-		DrawRotaGraph(625, 457, 1.0, 1.0, tama_init.handle[(int)Redtama2], TRUE);
-		DrawRotaGraph(620, 420, 1.25, 1.0, tama_init.handle[(int)Bluebomb1], TRUE);
-		break;
-	case 2:
+		DrawRotaFormatString(628, 467, 0.75, 0.75, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE, "%d", Redtama1_dansuu);
 		DrawRotaFormatString(625, 440, 1.0, 1.0, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE, "%d", Redtama2_dansuu);
 		DrawRotaFormatString(628, 400, 0.75, 0.75, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE, "%d", Bluebomb1_dansuu);
-		DrawRotaFormatString(628, 467, 0.75, 0.75, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE, "%d", Redtama1_dansuu);
 		DrawRotaGraph(625, 457, 1.0, 1.0, tama_init.handle[(int)Redtama1], TRUE);
-		DrawRotaGraph(620, 420, 1.5, 1.0, tama_init.handle[(int)Redtama2], TRUE);
+		DrawRotaGraph(620, 420, 1.25, 1.0, tama_init.handle[(int)Redtama2], TRUE);
 		DrawRotaGraph(625, 385, 1.0, 1.0, tama_init.handle[(int)Bluebomb1], TRUE);
+		break;
+	case 2:
+		DrawRotaFormatString(628, 400, 0.75, 0.75, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE, "%d", Redtama1_dansuu);
+		DrawRotaFormatString(628, 467, 0.75, 0.75, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE, "%d", Redtama2_dansuu);
+		DrawRotaFormatString(625, 440, 1.0, 1.0, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE, "%d", Bluebomb1_dansuu);
+		DrawRotaGraph(625, 385, 1.0, 1.0, tama_init.handle[(int)Redtama1], TRUE);
+		DrawRotaGraph(625, 457, 1.0, 1.0, tama_init.handle[(int)Redtama2], TRUE);
+		DrawRotaGraph(620, 420, 1.5, 1.0, tama_init.handle[(int)Bluebomb1], TRUE);
 		break;
 	}
 	int f = player.HP;
@@ -566,7 +566,7 @@ VOID SHOT_MODE(VOID)
 	{
 		SHOTMODE = FALSE;
 	}
-	if (Key[KEY_INPUT_F2] == 1 || ((GetJoypadInputState(DX_INPUT_PAD1) & PAD_INPUT_7) != 0))
+	if (((GetJoypadInputState(DX_INPUT_PAD1) & PAD_INPUT_7) != 0))
 	{
 		if (SHOTMODE_1 == FALSE)
 		{
@@ -659,12 +659,9 @@ VOID SHOT_KYODOU(VOID)
 				
 				if (tama[cnt].x < 100)
 				{
-					for (int i = 0; i < 10; i++)
-					{
 						DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[bomb], TRUE); // x,y ‚ÌˆÊ’u‚ÉƒLƒƒƒ‰‚ð•`‰æ
 
 						bomb++;
-					}
 				}
 				else
 				{
