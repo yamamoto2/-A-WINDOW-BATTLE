@@ -117,7 +117,7 @@ VOID JOUTAI_HYOUJI(VOID)
 	//DrawRotaFormatString(300, 300, 1.0, 1.0, 1.0, 1.0, PI, GetColor(0, 255, 0), GetColor(0, 255, 255), TRUE, "ƒŠƒ[ƒh’†");
 	//DrawRotaFormatString(300,300, 1.0, 2.0, 0.0, 0.0, 1.0, GetColor(0, 255, 0), GetColor(0, 255, 255), TRUE, "ƒŠƒ[ƒh’†");
 	//DrawFormatString(600, 10, GetColor(0, 255, 0), "%s‘¬", dansokuhyouji);//’e‘¬•\¦
-	//DrawFormatString(590, 25, GetColor(0, 255, 0), "%s•ûŒü", houkouhyouji);//’e‚Ì•ûŒü•\¦
+	DrawFormatString(590, 25, GetColor(0, 255, 0), "%d", shotmode);//’e‚Ì•ûŒü•\¦
 	//DrawFormatString(590, 40, GetColor(0, 255, 0), "%s’e", modehyouji);//’e‚Ìí—Ş•\¦
 	//DrawFormatString(100, 100, GetColor(0, 255, 0), "ƒQ[ƒ€‰æ–Ê");
 	//DrawFormatString(10, 10, GetColor(0, 255, 0), "%d", count);//ƒtƒŒOƒ€ƒJƒEƒ“ƒg
@@ -136,7 +136,6 @@ VOID DANSUU(VOID)//ƒŠƒ[ƒh’†‚ÉŒ‚‚Á‚Ä‚à’e‚ğÁ”ï‚·‚é‚¾‚¯‚Å’e‚Ío‚È‚¢‚¼I@©@‚±‚
 {
 	if (reload == TRUE)
 	{
-
 		tama[i].IsView = FALSE;
 		if (countC < count && Laser_dansuu < 1)//5•b‚½‚Á‚½‚ç
 		{
@@ -254,7 +253,6 @@ VOID SHOT_MODE(VOID)
 		if (SHOT == FALSE)
 		{
 			SHOT = TRUE;
-			tama[i].countA = count + 150;
 			tama[i].houkou = shothoukou;
 			tama[i].x = player.x - 18;
 			tama[i].y = player.y + 15;
@@ -272,7 +270,7 @@ VOID SHOT_MODE(VOID)
 					break;
 				}
 			}
-			if (reload == TRUE)
+			if (reload == TRUE)//ƒŠƒ[ƒh’†‚ÍŒ‚‚Á‚Ä‚à’e‚ªŒ¸‚é‚¾‚¯@¶Á¶Á‚Á‚Æ•s”­‰¹‚ğ•t‚¯‚é
 			{
 				tama[i].IsView = FALSE;
 			}
@@ -284,6 +282,7 @@ VOID SHOT_MODE(VOID)
 			if (i < TAMA_MAX)
 			{
 				i++;
+
 			}
 			else
 			{
@@ -423,13 +422,22 @@ VOID SHOT_MODE(VOID)
 			SHOTMODE = TRUE;
 			//’e‚Ìí—Ş‚ğŸ‚É‚·‚é
 			shotmode++;
+			if (shotmode == (int)Bomb2)
+			{
+				shotmode = (int)Delay;
+			}
+
+			if (shotmode == (int)XchaLu)
+			{
+				shotmode = (int)Tcha;
+			}
 
 			if (shotmode == (int)TAMA_KIND_END)
 			{
 				shotmode = (int)Laser;
 			}
 
-			
+
 		}
 	}
 	if ((GetJoypadInputState(DX_INPUT_PAD1) & PAD_INPUT_8) == 0)
@@ -519,24 +527,26 @@ VOID SHOT_KYODOU(VOID)
 				BLUE_BOMB(&tama[cnt]);
 				break;
 			case (int)Delay:
-				DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)Delay], TRUE); //
+				DELAY(&tama[cnt]);
 				break;
 			case (int)Ycha:
-				DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)Ycha], TRUE); //
+				YCHA(&tama[cnt]);
 				break;
 			case (int)Xcha:
-				DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)Xcha], TRUE); //
+				XCHA(&tama[cnt]);
 				break;
 			case (int)Tcha:
-				DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)Tcha], TRUE); //
+				TCHA(&tama[cnt]);
 				break;
 			case (int)Snipe:
-				DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)Snipe], TRUE); //
+				SNIPE(&tama[cnt]);
 				break;
 			case (int)Stay:
-				DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)Stay], TRUE); //
+				STAY(&tama[cnt]);
 				break;
-
+			case (int)Test:
+				TEST(&tama[cnt]);
+				break;
 			}
 
 			//’e‚ğÁ‚·ƒ^ƒCƒ~ƒ“ƒO
@@ -568,14 +578,20 @@ VOID SHOT_KYODOU(VOID)
 			RECT rect_tama;		//RECT‚ÍlŠp‚Ì¶AãA•A‚‚³‚Ì\‘¢‘Ì
 			rect_tama.left = tama[cnt].x;
 			rect_tama.top = tama[cnt].y;
+			//‰æ‘œ‚Ì‘å‚«‚³‚É‚æ‚èAƒTƒCƒY‚ğ‰º‚Å•ªŠò
+			//rect_tama.right = tama[cnt].x + tama[cnt].Width;
+			//rect_tama.bottom = tama[cnt].y + tama[cnt].Height;
+
 			RECT rect_player;	//RECT‚ÍlŠp‚Ì¶AãA•A‚‚³‚Ì\‘¢‘Ì
 			rect_player.left = player.x;
-			rect_player.top = player.y;
+			rect_player.top = player.y;//“–‚½‚è”»’è¬‚³‚­‚·‚é‚Æ‚«‚Íx.y‚ğ+ width height ‚ğ-‚·‚éB
 			rect_player.right = player.x + player.Width;
 			rect_player.bottom = player.y + player.Height;
+
 			RECT rect_tama_;		//RECT‚ÍlŠp‚Ì¶AãA•A‚‚³‚Ì\‘¢‘Ì
 			rect_tama_.left = tama_[cnt].x;
 			rect_tama_.top = tama_[cnt].y;
+
 			RECT rect_player_;	//RECT‚ÍlŠp‚Ì¶AãA•A‚‚³‚Ì\‘¢‘Ì
 			rect_player_.left = player_.x;
 			rect_player_.top = player_.y;
@@ -593,172 +609,230 @@ VOID SHOT_KYODOU(VOID)
 				rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Energy];
 				break;
 			case (int)Bomb1:
-				//if (tama[cnt].countB <= 11)//”š”­ƒGƒtƒFƒNƒg
-				//{
-				//	switch (tama[cnt].countB)
-				//	{
-				//	case 11:
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb1];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb1];
-				//		break;
-				//	case 10:
-				//		tama[cnt].shotmode = (int)Bomb2;
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb2];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb2];
-				//		break;
-				//	case 9:
-				//		tama[cnt].shotmode = (int)Bomb3;
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb3];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb3];
-				//		break;
-				//	case 8:
-				//		tama[cnt].shotmode = (int)Bomb4;
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb4];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb4];
-				//		break;
-				//	case 7:
-				//		tama[cnt].shotmode = (int)Bomb5;
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb5];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb5];
-				//		break;
-				//	case 6:
-				//		tama[cnt].shotmode = (int)Bomb6;
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb6];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb6];
-				//		break;
-				//	case 5:
-				//		tama[cnt].shotmode = (int)Bomb7;
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb7];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb7];
-				//		break;
-				//	case 4:
-				//		tama[cnt].shotmode = (int)Bomb8;
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb8];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb8];
-				//		break;
-				//	case 3:
-				//		tama[cnt].shotmode = (int)Bomb9;
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb9];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb9];
-				//		break;
-				//	case 2:
-				//		tama[cnt].shotmode = (int)Bomb10;
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb10];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb10];
-				//		break;
-				//	case 1:
-				//		tama[cnt].shotmode = (int)Bomb11;
-				//		rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Bomb11];
-				//		rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Bomb11];
-				//		break;
-				//	}
-				//}
+				rect_tama.right = tama[cnt].x + tama[cnt].Width[tama[cnt].BombKind];
+				rect_tama.bottom = tama[cnt].y + tama[cnt].Height[tama[cnt].BombKind];
+				break;
+			case (int)Delay:
+				rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Delay];
+				rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Delay];
+				break;
+			case (int)Ycha:
+				rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Ycha];
+				rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Ycha];
+				break;
+			case (int)Xcha:
+				rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Xcha];
+				rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Xcha];
+				break;
+			case (int)Tcha:
+				rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Tcha];
+				rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Tcha];
+				break;
+			case (int)Snipe:
+				rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Snipe];
+				rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Snipe];
+				break;
+			case (int)Stay:
+				rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Stay];
+				rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Stay];
+				break;
+			case (int)Test:
+				rect_tama.right = tama[cnt].x + tama[cnt].Width[(int)Test];
+				rect_tama.bottom = tama[cnt].y + tama[cnt].Height[(int)Test];
 				break;
 			}
 
+			//©•ª‚Ì’e‚Æ©‹@‚ª‚ ‚Á‚½‚Æ‚«
+			/*
 			if (ATARI_HANTEI(rect_tama, rect_player) == TRUE)//’e‚ÆƒvƒŒƒCƒ„[‚ªd‚È‚Á‚½‚Æ‚«
 			{
-				if (q < 100)//“_–Å‚³‚¹‚½‚¢
-				{
-					if (q > 40 && q < 80)
-					{
-						DAMAGE = TRUE;
-					}
-					q++;
-				}
-				else
-				{
-					DAMAGE = FALSE;
-					q = 0;
-				}
+
+				//“–‚½‚Á‚½’e‚ğ”ñ•\¦‚É‚·‚é
+				//tama[cnt].IsView = FALSE;
+
+				//HP‚ğŒ¸‚ç‚·
 				switch (tama[cnt].shotmode)
 				{
-				case  (int)Laser:	//0
-					tama[cnt].IsView = FALSE;
+				case (int)Laser:
 					player.HP -= 10;
 					break;
-				case  (int)Energy:	//1
-					tama[cnt].IsView = FALSE;
+				case (int)Energy:
 					player.HP -= 5;
 					break;
-				case  (int)Bomb1:	//2
-					player.HP -= 15;
-					tama[cnt].IsView = FALSE;
+				case (int)Bomb1:
 
-				//case (int)Bomb2:
-				//	player.HP -= 5;
-				//case (int)Bomb3:
-				//	player.HP -= 5;
-				//case (int)Bomb4:
-				//	player.HP -= 5;
-				//case (int)Bomb5:
-				//	player.HP -= 5;
-				//case (int)Bomb6:
-				//	player.HP -= 5;
-				//case (int)Bomb7:
-				//	player.HP -= 5;
-				//case (int)Bomb8:
-				//	player.HP -= 5;
-				//case (int)Bomb9:
-				//	player.HP -= 5;
-				//case (int)Bomb10:
-				//	player.HP -= 5;
-				//case (int)Bomb11:
-					player.HP -= 5;
-					tama[cnt].IsView = FALSE;
 					break;
-				}
-				if (ATARI_HANTEI2(rect_tama_, rect_player) == TRUE)//’e‚ÆƒvƒŒƒCƒ„[‚ªd‚È‚Á‚½‚Æ‚«
-				{
-					switch (tama_[cnt].shotmode)
-					{
-					case  (int)Laser:	//0
-						tama_[cnt].IsView = FALSE;
-						player.HP -= 10;
-						break;
-					case  (int)Energy:	//1
-						tama_[cnt].IsView = FALSE;
-						player.HP -= 5;
-						break;
-					case  (int)Bomb1:	//2
-						player.HP -= 15;
-						tama_[cnt].IsView = FALSE;
+				case (int)Bomb2:
 
-					//case (int)Bomb2:
-					//	player.HP -= 5;
-					//case (int)Bomb3:
-					//	player.HP -= 5;
-					//case (int)Bomb4:
-					//	player.HP -= 5;
-					//case (int)Bomb5:
-					//	player.HP -= 5;
-					//case (int)Bomb6:
-					//	player.HP -= 5;
-					//case (int)Bomb7:
-					//	player.HP -= 5;
-					//case (int)Bomb8:
-					//	player.HP -= 5;
-					//case (int)Bomb9:
-					//	player.HP -= 5;
-					//case (int)Bomb10:
-					//	player.HP -= 5;
-					//case (int)Bomb11:
-					//	player.HP -= 5;
-						tama_[cnt].IsView = FALSE;
-						break;
-					}
+					break;
+				case (int)Bomb3:
 
-					if (player.HP <= 0)
-					{
-						//‘Ì—Í‚ª‚O‚È‚ç‚ÎƒGƒ“ƒh‰æ–Ê
-						mode = (int)scene_end;
-						player.HP = 100;
-					}
+					break;
+				case (int)Bomb4:
+
+					break;
+				case (int)Bomb5:
+
+					break;
+				case (int)Bomb6:
+
+					break;
+				case (int)Bomb7:
+
+					break;
+				case (int)Bomb8:
+
+					break;
+				case (int)Bomb9:
+
+					break;
+				case (int)Bomb10:
+
+					break;
+				case (int)Bomb11:
+
+					break;
+				case (int)Delay:
+
+					break;
+				case (int)Ycha:
+
+					break;
+				case (int)Xcha:
+
+					break;
+				case (int)XchaLu:
+
+					break;
+				case (int)XchaLd:
+
+					break;
+				case (int)XchaRu:
+
+					break;
+				case (int)XchaRd:
+
+					break;
+				case (int)Tcha:
+
+					break;
+				case (int)Snipe:
+
+					break;
+				case (int)Stay:
+
+					break;
+
 				}
 			}
+			*/
+
+			//‘Šè‚Ì’e‚Æ©‹@‚ª‚ ‚Á‚½‚Æ‚«
+			if (ATARI_HANTEI(rect_tama, rect_player) == TRUE)//ƒAƒ“ƒ_[ƒo[•t‚¯‘Ö‚¦–Y‚ê‚é‚È
+			{
+				//“–‚½‚Á‚½’e‚ğ”ñ•\¦‚É‚·‚é
+				tama[cnt].IsView = FALSE;
+
+				//HP‚ğŒ¸‚ç‚·
+				switch (tama[cnt].shotmode)
+				{
+				case (int)Laser:
+					player.HP -= 10;
+					break;
+				case (int)Energy:
+					player.HP -= 5;
+					break;
+				case (int)Bomb1:
+
+					break;
+				case (int)Bomb2:
+
+					break;
+				case (int)Bomb3:
+
+					break;
+				case (int)Bomb4:
+
+					break;
+				case (int)Bomb5:
+
+					break;
+				case (int)Bomb6:
+
+					break;
+				case (int)Bomb7:
+
+					break;
+				case (int)Bomb8:
+
+					break;
+				case (int)Bomb9:
+
+					break;
+				case (int)Bomb10:
+
+					break;
+				case (int)Bomb11:
+
+					break;
+				case (int)Delay:
+
+					break;
+				case (int)Ycha:
+
+					break;
+				case (int)Xcha:
+
+					break;
+				case (int)XchaLu:
+
+					break;
+				case (int)XchaLd:
+
+					break;
+				case (int)XchaRu:
+
+					break;
+				case (int)XchaRd:
+
+					break;
+				case (int)Tcha:
+
+					break;
+				case (int)Snipe:
+
+					break;
+				case (int)Stay:
+
+					break;
+
+				}
+			}
+
+			if (player.HP <= 0)
+			{
+				//‘Ì—Í‚ª‚O‚È‚ç‚ÎƒGƒ“ƒh‰æ–Ê
+				mode = (int)scene_end;
+				player.HP = 100;
+			}
+
 		}
 	}
 }
+
+//##################“–‚½‚è”»’è‚ÌŠÖ”########################
+BOOL ATARI_HANTEI(RECT tama, RECT player)//()‚Ì’†‚Í‚±‚Ì\‘¢‘Ì‚Ì•Ï”‚ğg‚¤‚æA“I‚È 
+{
+	if (tama.left < player.right &&
+		tama.top < player.bottom &&
+		tama.right > player.left &&
+		tama.bottom > player.top)
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+
 //##################‰æ‘œ“Ç‚İ‚İŠÖ”########################
 VOID GAZOU_YOMIKOMI(VOID)
 {
@@ -766,24 +840,32 @@ VOID GAZOU_YOMIKOMI(VOID)
 	player.Handle = LoadGraph("‰æ‘œ/ƒLƒƒƒ‰ƒNƒ^00.png"); // ƒvƒŒƒCƒ„[‰æ‘œ‚Ìƒ[ƒh
 	tama_init.handle[(int)Laser] = LoadGraph("‰æ‘œ/’e/ÔƒŒ[ƒU[.png");
 	tama_init.handle[(int)Energy] = LoadGraph("‰æ‘œ/’e/Ô‹­’e.png");
-//	tama_init.handle[(int)Redtama3] = LoadGraph("‰æ‘œ/ÔOŠp’e.png");
 	tama_init.handle[(int)Bomb1] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­1.png");
-	//tama_init.handle[(int)Bomb2] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­2.png");
-	//tama_init.handle[(int)Bomb3] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­3.png");
-	//tama_init.handle[(int)Bomb4] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­4.png");
-	//tama_init.handle[(int)Bomb5] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­5.png");
-	//tama_init.handle[(int)Bomb6] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­6.png");
-	//tama_init.handle[(int)Bomb7] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­7.png");
-	//tama_init.handle[(int)Bomb8] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­8.png");
-	//tama_init.handle[(int)Bomb9] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­9.png");
-	//tama_init.handle[(int)Bomb10] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­10.png");
-	//tama_init.handle[(int)Bomb11] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­11.png");
+	tama_init.handle[(int)Bomb2] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­2.png");
+	tama_init.handle[(int)Bomb3] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­3.png");
+	tama_init.handle[(int)Bomb4] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­4.png");
+	tama_init.handle[(int)Bomb5] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­5.png");
+	tama_init.handle[(int)Bomb6] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­6.png");
+	tama_init.handle[(int)Bomb7] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­7.png");
+	tama_init.handle[(int)Bomb8] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­8.png");
+	tama_init.handle[(int)Bomb9] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­9.png");
+	tama_init.handle[(int)Bomb10] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­10.png");
+	tama_init.handle[(int)Bomb11] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­11.png");
 	tama_init.handle[(int)Delay] = LoadGraph("‰æ‘œ/’e/“ƒŒ[ƒU[.png");
 	tama_init.handle[(int)Ycha] = LoadGraph("‰æ‘œ/’e/ÔOŠp’e.png");
 	tama_init.handle[(int)Xcha] = LoadGraph("‰æ‘œ/’e/X’e.png");
+
+	tama_init.handle[(int)XchaLu] = LoadGraph("‰æ‘œ/’e/ÔOŠp’e.png");
+	tama_init.handle[(int)XchaLd] = LoadGraph("‰æ‘œ/’e/ÔOŠp’e.png");
+	tama_init.handle[(int)XchaRu] = LoadGraph("‰æ‘œ/’e/ÔOŠp’e.png");
+	tama_init.handle[(int)XchaRd] = LoadGraph("‰æ‘œ/’e/ÔOŠp’e.png");
+
 	tama_init.handle[(int)Tcha] = LoadGraph("‰æ‘œ/’e/{’e.png");
 	tama_init.handle[(int)Snipe] = LoadGraph("‰æ‘œ/’e/Snipe’e.png");
+
 	tama_init.handle[(int)Stay] = LoadGraph("‰æ‘œ/’e/Stay’e.png");
+
+	tama_init.handle[(int)Test] = LoadGraph("‰æ‘œ/Â”š”­/Â”š”­11.png");
 
 	lockon.Handle[(int)lockon1] = LoadGraph("‰æ‘œ/ƒƒbƒNƒIƒ“/ƒƒbƒNƒIƒ“1.jpg");
 	lockon.Handle[(int)lockon2] = LoadGraph("‰æ‘œ/ƒƒbƒNƒIƒ“/ƒƒbƒNƒIƒ“2.jpg");
@@ -799,18 +881,30 @@ VOID GAZOU_YOMIKOMI(VOID)
 	GetGraphSize(player.Handle, &player.Width, &player.Height);
 	GetGraphSize(tama_init.handle[(int)Laser], &tama_init.Width[(int)Laser], &tama_init.Height[(int)Laser]);
 	GetGraphSize(tama_init.handle[(int)Energy], &tama_init.Width[(int)Energy], &tama_init.Height[(int)Energy]);
-	GetGraphSize(tama_init.handle[(int)Delay], &tama_init.Width[(int)Delay], &tama_init.Height[(int)Delay]);
 	GetGraphSize(tama_init.handle[(int)Bomb1], &tama_init.Width[(int)Bomb1], &tama_init.Height[(int)Bomb1]);
-	//GetGraphSize(tama_init.handle[(int)Bomb2], &tama_init.Width[(int)Bomb2], &tama_init.Height[(int)Bomb2]);
-	//GetGraphSize(tama_init.handle[(int)Bomb3], &tama_init.Width[(int)Bomb3], &tama_init.Height[(int)Bomb3]);
-	//GetGraphSize(tama_init.handle[(int)Bomb4], &tama_init.Width[(int)Bomb4], &tama_init.Height[(int)Bomb4]);
-	//GetGraphSize(tama_init.handle[(int)Bomb5], &tama_init.Width[(int)Bomb5], &tama_init.Height[(int)Bomb5]);
-	//GetGraphSize(tama_init.handle[(int)Bomb6], &tama_init.Width[(int)Bomb6], &tama_init.Height[(int)Bomb6]);
-	//GetGraphSize(tama_init.handle[(int)Bomb7], &tama_init.Width[(int)Bomb7], &tama_init.Height[(int)Bomb7]);
-	//GetGraphSize(tama_init.handle[(int)Bomb8], &tama_init.Width[(int)Bomb8], &tama_init.Height[(int)Bomb8]);
-	//GetGraphSize(tama_init.handle[(int)Bomb9], &tama_init.Width[(int)Bomb9], &tama_init.Height[(int)Bomb9]);
-	//GetGraphSize(tama_init.handle[(int)Bomb10], &tama_init.Width[(int)Bomb10], &tama_init.Height[(int)Bomb10]);
-	//GetGraphSize(tama_init.handle[(int)Bomb11], &tama_init.Width[(int)Bomb11], &tama_init.Height[(int)Bomb11]);
+	GetGraphSize(tama_init.handle[(int)Bomb2], &tama_init.Width[(int)Bomb2], &tama_init.Height[(int)Bomb2]);
+	GetGraphSize(tama_init.handle[(int)Bomb3], &tama_init.Width[(int)Bomb3], &tama_init.Height[(int)Bomb3]);
+	GetGraphSize(tama_init.handle[(int)Bomb4], &tama_init.Width[(int)Bomb4], &tama_init.Height[(int)Bomb4]);
+	GetGraphSize(tama_init.handle[(int)Bomb5], &tama_init.Width[(int)Bomb5], &tama_init.Height[(int)Bomb5]);
+	GetGraphSize(tama_init.handle[(int)Bomb6], &tama_init.Width[(int)Bomb6], &tama_init.Height[(int)Bomb6]);
+	GetGraphSize(tama_init.handle[(int)Bomb7], &tama_init.Width[(int)Bomb7], &tama_init.Height[(int)Bomb7]);
+	GetGraphSize(tama_init.handle[(int)Bomb8], &tama_init.Width[(int)Bomb8], &tama_init.Height[(int)Bomb8]);
+	GetGraphSize(tama_init.handle[(int)Bomb9], &tama_init.Width[(int)Bomb9], &tama_init.Height[(int)Bomb9]);
+	GetGraphSize(tama_init.handle[(int)Bomb10], &tama_init.Width[(int)Bomb10], &tama_init.Height[(int)Bomb10]);
+	GetGraphSize(tama_init.handle[(int)Bomb11], &tama_init.Width[(int)Bomb11], &tama_init.Height[(int)Bomb11]);
+	GetGraphSize(tama_init.handle[(int)Delay], &tama_init.Width[(int)Delay], &tama_init.Height[(int)Delay]);
+	GetGraphSize(tama_init.handle[(int)Ycha], &tama_init.Width[(int)Ycha], &tama_init.Height[(int)Ycha]);
+	GetGraphSize(tama_init.handle[(int)Xcha], &tama_init.Width[(int)Xcha], &tama_init.Height[(int)Xcha]);
+
+	GetGraphSize(tama_init.handle[(int)XchaLu], &tama_init.Width[(int)XchaLu], &tama_init.Height[(int)XchaLu]);
+	GetGraphSize(tama_init.handle[(int)XchaLd], &tama_init.Width[(int)XchaLd], &tama_init.Height[(int)XchaLd]);
+	GetGraphSize(tama_init.handle[(int)XchaRu], &tama_init.Width[(int)XchaRu], &tama_init.Height[(int)XchaRu]);
+	GetGraphSize(tama_init.handle[(int)XchaRd], &tama_init.Width[(int)XchaRd], &tama_init.Height[(int)XchaRd]);
+
+	GetGraphSize(tama_init.handle[(int)Tcha], &tama_init.Width[(int)Tcha], &tama_init.Height[(int)Tcha]);
+	GetGraphSize(tama_init.handle[(int)Snipe], &tama_init.Width[(int)Snipe], &tama_init.Height[(int)Snipe]);
+	GetGraphSize(tama_init.handle[(int)Stay], &tama_init.Width[(int)Stay], &tama_init.Height[(int)Stay]);
+
 	//	GetGraphSize(lockon.Handle[(int)lockon1],&lockon.Width[(int)lockon1],&lockon.Height[(int)lockon1]);“–‚½‚è”»’èl‚¦‚È‚¢‚µ‰æ‘œƒTƒCƒYæ‚é•K—v‚È‚µ
 	//  GetGraphSize(lockon.Handle[(int)lockon2], &lockon.Width[(int)lockon2], &lockon.Height[(int)lockon2]);
 	//	GetGraphSize(lockon.Handle[(int)lockon3], &lockon.Width[(int)lockon3], &lockon.Height[(int)lockon3]);
@@ -833,29 +927,6 @@ VOID PLAYER_HYOUJI(VOID)
 		DrawGraph(player.x, player.y, player.Handle, TRUE);
 	}
 }
-//##################“–‚½‚è”»’è‚ÌŠÖ”########################
-BOOL ATARI_HANTEI(RECT tama, RECT player)//()‚Ì’†‚Í‚±‚Ì\‘¢‘Ì‚Ì•Ï”‚ğg‚¤‚æA“I‚È 
-{
-	if (tama.left < player.right &&
-		tama.top < player.bottom &&
-		tama.right > player.left &&
-		tama.bottom > player.top)
-	{
-		return TRUE;
-	}
-	return FALSE;
-}//BOOLŠÖ”‚ÍVOID‚Æ‚Íg‚¢‚Ç‚±‚ë‚ªˆá‚¤‚İ‚½‚¢
-BOOL ATARI_HANTEI2(RECT tama_, RECT player)//()‚Ì’†‚Í‚±‚Ì\‘¢‘Ì‚Ì•Ï”‚ğg‚¤‚æA“I‚È 
-{
-	if (tama_.left < player.right &&
-		tama_.top < player.bottom &&
-		tama_.right > player.left &&
-		tama_.bottom > player.top)
-	{
-		return TRUE;
-	}
-	return FALSE;
-}//BOOLŠÖ”‚ÍVOID‚Æ‚Íg‚¢‚Ç‚±‚ë‚ªˆá‚¤‚İ‚½‚¢
 //Â‚¢’e‚Ì”š”­•`‰æ
 VOID BLUE_BOMB(TAMA* t)
 {
@@ -865,10 +936,9 @@ VOID BLUE_BOMB(TAMA* t)
 
 	//”š”­‚Ì‰æ‘œ‚ğ•`‰æ
 
-	if (tama[cnt].x < 100)
+	if (t->x < 100)
 	{
 		DrawGraph(bakuX, bakuY, t->handle[t->BombKind], TRUE);
-
 
 		//”š”­‚ÌƒAƒjƒ[ƒVƒ‡ƒ“ˆ—
 		if (t->BombCnt < t->BombCntMax)
@@ -887,14 +957,162 @@ VOID BLUE_BOMB(TAMA* t)
 	}
 	else
 	{
-		DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[tama[cnt].BombKind], TRUE); // x,y ‚ÌˆÊ’u‚ÉƒLƒƒƒ‰‚ğ•`‰æ
+		DrawGraph(t->x, t->y - 3, t->handle[t->BombKind], TRUE); // x,y ‚ÌˆÊ’u‚ÉƒLƒƒƒ‰‚ğ•`‰æ
 	}
 
 	return;
 }
-VOID PINK_TAMA(TAMA* t)
+VOID DELAY(TAMA* t)
 {
-	
-	DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)Delay], TRUE); //ƒƒ“ƒeƒ“ƒ|’x‚ê‚Ä‚¤‚²
+	if (t->PinkCnt == t->PinkCntMax)
+	{
+		t->Pinkdansoku = t->dansoku;//’e‘¬‚ğˆê‘Ş”ğ‚³‚¹‚Ä•ÛŠÇ‚·‚é
+		t->dansoku = 0;//’e‘¬‚ğ‚È‚­‚·
+	}
+
+	if (t->PinkCnt > 0)//ƒJƒEƒ“ƒg‚ª‚O‚¶‚á‚È‚¢‚È‚ç
+	{
+		DrawGraph(t->x, t->y - 3, t->handle[(int)Delay], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->PinkCnt--;//ƒJƒEƒ“ƒg‚ğŒ¸‚ç‚·
+	}
+	else//‚O‚É‚È‚Á‚½‚ç
+	{
+		t->dansoku = t->Pinkdansoku;//•ÛŠÇ‚µ‚Ä‚¢‚½’e‘¬‚ğŒ³‚É–ß‚µ‚Ä’e‚ğ“®‚©‚·
+		DrawGraph(t->x, t->y - 3, t->handle[(int)Delay], TRUE);
+	}
+}
+VOID YCHA(TAMA* t)
+{
+
+	if (tama[cnt].x < 250)
+	{
+		DrawGraph(tama[cnt].x, t->Ly, tama[cnt].handle[(int)Ycha], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->Ly--;
+		DrawGraph(tama[cnt].x, t->Ry, tama[cnt].handle[(int)Ycha], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->Ry++;
+	}
+	else
+	{
+		DrawGraph(t->x, t->y - 3, t->handle[(int)Ycha], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->Ly = t->y;
+		t->Ry = t->y;
+	}
+}
+VOID XCHA(TAMA* t)
+{
+	if (t->Same == TRUE)
+	{
+		DrawGraph(t->Lu, t->Ly, t->handle[(int)XchaLu], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->Lu++;
+		DrawGraph(t->Ru, t->Ry, t->handle[(int)XchaRu], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->Ru++;
+		DrawGraph(t->Ld, t->Ly, t->handle[(int)XchaLd], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->Ld--;
+		DrawGraph(t->Rd, t->Ry, t->handle[(int)XchaLd], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->Rd--;
+
+		t->Ly -= 2;
+		t->Ry += 2;
+	}
+	else
+	{
+		DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)XchaLu], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)XchaLd], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)XchaRu], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)XchaRd], TRUE); //’e‚ğ•\¦‚µ‚Ä
+
+		if (tama[cnt].x <= player_.x)
+		{
+			t->Same = TRUE;
+		}
+		if (t->Same == TRUE)
+		{
+			t->dansoku = 2;
+
+			t->Lu = t->x;
+			t->Ru = t->x;
+			t->Ld = t->x;
+			t->Rd = t->x;
+
+			t->Ly = t->y;
+			t->Ry = t->y;
+		}
+	}
+}
+VOID TCHA(TAMA* t)
+{
+	if (t->Same == TRUE)
+	{
+		DrawGraph(t->x, t->Ly, t->handle[(int)Tcha], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->Ly--;
+		DrawGraph(t->x, t->Ry, t->handle[(int)Tcha], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->Ry++;
+	}
+	else
+	{
+		DrawGraph(t->x, t->y - 3, t->handle[(int)Tcha], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		if (t->x <= player_.x)
+		{
+			t->Same = TRUE;
+		}
+		if (t->Same == TRUE)
+		{
+			t->dansoku = 0;
+			t->Ly = t->y;
+			t->Ry = t->y;
+		}
+	}
+}
+VOID SNIPE(TAMA* t)
+{
+	if (t->Snipe == FALSE)
+	{
+		t->dansoku = 0;
+		t->SnX = t->x - player_.x;
+		t->SnY = t->y - player_.y;
+		t->Snipe = TRUE;
+	}
+	else
+	{
+		DrawGraph(t->x, t->y, t->handle[(int)Snipe], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		t->x -= t->SnX / 50;
+		t->y -= t->SnY / 50;
+	}
 
 }
+VOID STAY(TAMA* t)
+{
+	if (t->Same == TRUE)
+	{
+		if (t->stay > 0)
+		{
+			DrawGraph(t->x, t->Ly, t->handle[(int)Stay], TRUE); //’e‚ğ•\¦‚µ‚Ä
+			t->stay--;
+		}
+	}
+	else
+	{
+		DrawGraph(t->x, t->y - 3, t->handle[(int)Stay], TRUE); //’e‚ğ•\¦‚µ‚Ä
+		if (t->x <= player_.x)
+		{
+			t->Same = TRUE;
+		}
+		if (t->Same == TRUE)
+		{
+			t->dansoku = 0;
+			t->Ly = t->y;
+			t->Ry = t->y;
+		}
+	}
+
+}
+VOID TEST(TAMA* t)
+{
+	DrawGraph(t->x, t->y - 3, t->handle[(int)Test], TRUE); //’e‚ğ•\¦‚µ‚Ä
+
+}
+//BOOL atarihantei(int )
+//{
+//	
+//	
+//}

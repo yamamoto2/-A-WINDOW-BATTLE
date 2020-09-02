@@ -16,7 +16,7 @@ enum TAMA_KIND {//列挙型、上から順に0.1.2.3.4...と数字を与えられる　途中から別の
 	Laser,
 	Energy,
 	Bomb1,
-	/*Bomb2=101,
+	Bomb2,
 	Bomb3,
 	Bomb4,
 	Bomb5,
@@ -25,13 +25,18 @@ enum TAMA_KIND {//列挙型、上から順に0.1.2.3.4...と数字を与えられる　途中から別の
 	Bomb8,
 	Bomb9,
 	Bomb10,
-	Bomb11,*/
+	Bomb11,
 	Delay,
 	Ycha,
-	Tcha,
 	Xcha,
+	XchaLu,
+	XchaLd,
+	XchaRu,
+	XchaRd,
+	Tcha,
 	Snipe,
 	Stay,
+	Test,
 	TAMA_KIND_END	//弾の種類の最大値
 };
 enum LOCK_ON//ロックオン画像の

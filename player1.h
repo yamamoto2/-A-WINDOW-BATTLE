@@ -16,17 +16,37 @@ struct TAMA//弾の構造体
 	int Width[(int)TAMA_KIND_END];	//弾の幅
 	int Height[(int)TAMA_KIND_END];	//弾の高さ
 
-	int BombKind = 101;		//爆発の画像の現在の種類
-	int BombKindMax = 110;	//爆発の画像の最大数
-
+	int BombKind = 2;		//爆発の画像の現在の種類
+	int BombKindMax = 11;	//爆発の画像の最大数
 	int BombCnt = 0;    //爆発の挙動のための数値
 	int BombCntMax = 3;	//爆発のコマ送りのフレーム数
-	int PinkCnt = 20;
+
+	int PinkCnt =20,PinkCntMax = 20;
+	int Pinkdansoku = 0; //減らした弾速の保存先
+
+	int Ly = 0;
+	int Ry = 0;
+
+	int Lu = 0;
+	int Ld = 0;
+	int Ru = 0;
+	int Rd = 0;
+
+	int SnY = 0;
+	int SnX = 0;
+
+	int stay = 600;
+
+	BOOL Snipe = FALSE;
+
+	BOOL Same = FALSE;
+
+
 };
 
 struct PLAYER//自機の構造体
 {
-	int HP;
+	int HP=100;
 	int Handle;	//画像格納用ハンドル
 	int x;
 	int y;
@@ -44,9 +64,15 @@ VOID GAZOU_YOMIKOMI(VOID);
 VOID PAD_SOUSA(VOID);
 
 VOID BLUE_BOMB(TAMA *);	//青い弾の爆発描画
+VOID DELAY(TAMA*);
+VOID YCHA(TAMA *);
+VOID XCHA(TAMA *);
+VOID TCHA(TAMA *);
+VOID STAY(TAMA *);
+VOID SNIPE(TAMA *);
+VOID TEST(TAMA*);
 
 BOOL ATARI_HANTEI(RECT, RECT);
-BOOL ATARI_HANTEI2(RECT, RECT);
 
 extern BOOL A;//弾が０の時射撃キーを押すたびにリロードに対する対策
 extern BOOL B;//弾が０の時射撃キーを押すたびにリロードに対する対策
