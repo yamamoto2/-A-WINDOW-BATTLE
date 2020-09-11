@@ -19,13 +19,34 @@ struct TAMA_//弾の構造体
 
 	int BombKind = 2;		//爆発の画像の現在の種類
 	int BombKindMax = 11;	//爆発の画像の最大数
-	int BombCnt = 0;//爆発の挙動のための数値
+	int BombCnt = 0;    //爆発の挙動のための数値
 	int BombCntMax = 3;	//爆発のコマ送りのフレーム数
+
+	int PinkCnt = 20, PinkCntMax = 20;
+	int Pinkdansoku = 0; //減らした弾速の保存先
+
+	int Ly = 0;
+	int Ry = 0;
+
+	int Lu = 0;
+	int Ld = 0;
+	int Ru = 0;
+	int Rd = 0;
+
+	int SnY = 0;
+	int SnX = 0;
+
+	int stay = 600;
+
+	BOOL Snipe = FALSE;
+
+	BOOL Same = FALSE;
+
 };
 
 struct PLAYER_//自機の構造体
 {
-	int HP;
+	int HP=100;
 	int Handle;	//画像格納用ハンドル
 	int x;
 	int y;
@@ -43,9 +64,16 @@ VOID GAZOU_YOMIKOMI_(VOID);
 VOID PAD_SOUSA(VOID);
 
 VOID BLUE_BOMB(TAMA_ *);	//青い弾の爆発描画
+VOID DELAY(TAMA_*);
+VOID YCHA(TAMA_*);
+VOID XCHA(TAMA_*);
+VOID TCHA(TAMA_*);
+VOID STAY(TAMA_*);
+VOID SNIPE(TAMA_*);
+VOID TEST(TAMA_*);
+
 
 BOOL ATARI_HANTEI_(RECT, RECT);
-BOOL ATARI_HANTEI_2(RECT, RECT);
 
 extern int Laser_dansuu_;
 extern int Energy_dansuu_;

@@ -577,11 +577,7 @@ VOID SHOT_KYODOU(VOID)
 			}*/
 			RECT rect_tama;		//RECTは四角の左、上、幅、高さの構造体
 			rect_tama.left = tama[cnt].x;
-			rect_tama.top = tama[cnt].y;
-			//画像の大きさにより、サイズを下で分岐
-			//rect_tama.right = tama[cnt].x + tama[cnt].Width;
-			//rect_tama.bottom = tama[cnt].y + tama[cnt].Height;
-
+			rect_tama.top = tama[cnt].y;//画像の大きさにより、サイズを下で分岐
 			RECT rect_player;	//RECTは四角の左、上、幅、高さの構造体
 			rect_player.left = player.x;
 			rect_player.top = player.y;//当たり判定小さくするときはx.yを+ width height を-する。
@@ -728,19 +724,19 @@ VOID SHOT_KYODOU(VOID)
 			*/
 
 			//相手の弾と自機があったとき
-			if (ATARI_HANTEI(rect_tama, rect_player) == TRUE)//アンダーバー付け替え忘れるな
+			if (ATARI_HANTEI(rect_tama, rect_player_) == TRUE)//アンダーバー付け替え忘れるな
 			{
 				//当たった弾を非表示にする
 				tama[cnt].IsView = FALSE;
 
 				//HPを減らす
-				switch (tama[cnt].shotmode)
+				switch (tama_[cnt].shotmode)
 				{
 				case (int)Laser:
-					player.HP -= 10;
+					player_.HP -= 10;
 					break;
 				case (int)Energy:
-					player.HP -= 5;
+					player_.HP -= 5;
 					break;
 				case (int)Bomb1:
 
@@ -821,12 +817,12 @@ VOID SHOT_KYODOU(VOID)
 }
 
 //##################当たり判定の関数########################
-BOOL ATARI_HANTEI(RECT tama, RECT player)//()の中はこの構造体の変数を使うよ、的な 
+BOOL ATARI_HANTEI(RECT tama_, RECT player)//()の中はこの構造体の変数を使うよ、的な 
 {
-	if (tama.left < player.right &&
-		tama.top < player.bottom &&
-		tama.right > player.left &&
-		tama.bottom > player.top)
+	if (tama_.left < player.right &&
+		tama_.top < player.bottom &&
+		tama_.right > player.left &&
+		tama_.bottom > player.top)
 	{
 		return TRUE;
 	}
@@ -984,11 +980,11 @@ VOID DELAY(TAMA* t)
 VOID YCHA(TAMA* t)
 {
 
-	if (tama[cnt].x < 250)
+	if (t->x < 250)
 	{
-		DrawGraph(tama[cnt].x, t->Ly, tama[cnt].handle[(int)Ycha], TRUE); //弾を表示して
+		DrawGraph(t->x, t->Ly, t->handle[(int)Ycha], TRUE); //弾を表示して
 		t->Ly--;
-		DrawGraph(tama[cnt].x, t->Ry, tama[cnt].handle[(int)Ycha], TRUE); //弾を表示して
+		DrawGraph(t->x, t->Ry, t->handle[(int)Ycha], TRUE); //弾を表示して
 		t->Ry++;
 	}
 	else
@@ -1016,12 +1012,12 @@ VOID XCHA(TAMA* t)
 	}
 	else
 	{
-		DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)XchaLu], TRUE); //弾を表示して
-		DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)XchaLd], TRUE); //弾を表示して
-		DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)XchaRu], TRUE); //弾を表示して
-		DrawGraph(tama[cnt].x, tama[cnt].y - 3, tama[cnt].handle[(int)XchaRd], TRUE); //弾を表示して
+		DrawGraph(t->x, t->y - 3, t->handle[(int)XchaLu], TRUE); //弾を表示して
+		DrawGraph(t->x, t->y - 3, t->handle[(int)XchaLd], TRUE); //弾を表示して
+		DrawGraph(t->x, t->y - 3, t->handle[(int)XchaRu], TRUE); //弾を表示して
+		DrawGraph(t->x, t->y - 3, t->handle[(int)XchaRd], TRUE); //弾を表示して
 
-		if (tama[cnt].x <= player_.x)
+		if (t->x <= player_.x)
 		{
 			t->Same = TRUE;
 		}
@@ -1111,6 +1107,15 @@ VOID TEST(TAMA* t)
 	DrawGraph(t->x, t->y - 3, t->handle[(int)Test], TRUE); //弾を表示して
 
 }
+VOID BEAM(TAMA* t)
+{
+
+}
+//押してる間必殺技を選ぶモードになるボタン
+//あるボタンを押しながらスティックを傾けると前方180度に限り必殺技の向きを指定できる
+//事前に方向を決めたのち必殺技撃つサッと指定して撃つことも
+//ビームで敵の弾、敵味方両方の弾を消せても良いかも
+//ifもしゲージがあるときにあるボタンを押したら・
 //BOOL atarihantei(int )
 //{
 //	

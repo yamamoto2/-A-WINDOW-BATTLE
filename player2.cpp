@@ -16,6 +16,7 @@ int dansoku_ = 2;//初期弾速
 int dansokumode_ = 0;//弾速の変更
 int shotmode_ = 0;//弾の種類　初期弾種：０
 int q_ = 0;
+int cnt_ = 0;
 
 TAMA_ tama_init_;	//弾の画像読み込み・初期化のために使う変数
 TAMA_ tama_[TAMA_MAX];//構造体の配列
@@ -217,16 +218,16 @@ VOID IDOU_SOUSA_(VOID)
 	switch (reload_)
 	{
 	case 0://通常時
-		if ((GetJoypadInputState(DX_INPUT_PAD2) & PAD_INPUT_UP) != 0) { // 右キーが押されていたら
+		if ((GetJoypadInputState(DX_INPUT_PAD2) & PAD_INPUT_UP) != 0 || Key[KEY_INPUT_RIGHT] != 0) { // 右キーが押されていたら
 			player_.x += 4;                       // 右へ移動
 		}
-		if ((GetJoypadInputState(DX_INPUT_PAD2) & PAD_INPUT_RIGHT) != 0) { // 下キーが押されていたら
+		if ((GetJoypadInputState(DX_INPUT_PAD2) & PAD_INPUT_RIGHT) != 0 || Key[KEY_INPUT_DOWN] != 0) { // 下キーが押されていたら
 			player_.y += 4;                       // 下へ移動
 		}
-		if ((GetJoypadInputState(DX_INPUT_PAD2) & PAD_INPUT_DOWN) != 0) { // 左 キーが押されていたら
+		if ((GetJoypadInputState(DX_INPUT_PAD2) & PAD_INPUT_DOWN) != 0 || Key[KEY_INPUT_LEFT] != 0) { // 左 キーが押されていたら
 			player_.x -= 4;                       // 左へ移動
 		}
-		if ((GetJoypadInputState(DX_INPUT_PAD2) & PAD_INPUT_LEFT) != 0) { // 上キーが押されていたら
+		if ((GetJoypadInputState(DX_INPUT_PAD2) & PAD_INPUT_LEFT) != 0 || Key[KEY_INPUT_UP] != 0) { // 上キーが押されていたら
 			player_.y -= 4;                       // 上へ移動
 		}
 	case 1://リロード中は移動速度半減
@@ -248,7 +249,7 @@ VOID IDOU_SOUSA_(VOID)
 //##################射撃関係の関数*########################
 VOID SHOT_MODE_(VOID)
 {
-	if ((GetJoypadInputState(DX_INPUT_PAD2) & PAD_INPUT_3) != 0)
+	if ((GetJoypadInputState(DX_INPUT_PAD2) & PAD_INPUT_3) != 0 || Key[KEY_INPUT_V] == 1)
 	{
 		if (SHOT_ == FALSE)
 		{
@@ -523,6 +524,7 @@ VOID SHOT_KYODOU_(VOID)
 				}
 				break;
 			}
+
 			//####################弾の種類###########################
 			switch (tama_[cnt].shotmode)
 			{
@@ -535,30 +537,43 @@ VOID SHOT_KYODOU_(VOID)
 			case (int)Bomb1:
 				DrawGraph(tama_[cnt].x, tama_[cnt].y - 3, tama_[cnt].handle[(int)Bomb1], TRUE); // x,y の位置にキャラを描画
 				break;
+			case (int)Delay:
+				DELAY(&tama_[cnt]);
+				break;
+			case (int)Ycha:
+				YCHA(&tama_[cnt]);
+				break;
+			case (int)Xcha:
+				XCHA(&tama_[cnt]);
+				break;
+			case (int)Tcha:
+				TCHA(&tama_[cnt]);
+				break;
+			case (int)Snipe:
+				SNIPE(&tama_[cnt]);
+				break;
+			case (int)Stay:
+				STAY(&tama_[cnt]);
+				break;
+			case (int)Test:
+				TEST(&tama_[cnt]);
+				break;
 			}
+
+		
 			//弾を消すタイミング
-			if (tama_[cnt].IsView == FALSE)//弾が消えたとき
+			if (tama[cnt].x < 0 || tama[cnt].IsView == FALSE)
 			{
-				if (tama_[cnt].shotmode == (int)Bomb1)	//爆発弾ならば
+				if (tama[cnt].shotmode >= (int)Bomb1)	//爆発弾ならば
 				{
-					if (tama_[cnt].countB <= 11)//爆発エフェクト
+					if (tama[cnt].countB == 0)//爆発エフェクト
 					{
-						switch (tama_[cnt].countB)
-						{
-						case 11:
-							DrawGraph(tama_[cnt].x, tama_[cnt].y - 3, tama_[cnt].handle[(int)Bomb1], TRUE); // x,y の位置にキャラを描画
-							break;
-						}
-						tama_[cnt].countB--;
-					}
-					if (tama_[cnt].countB == 0)//爆発エフェクト
-					{
-						tama_[cnt].IsView = FALSE;
+						tama[cnt].IsView = FALSE;
 					}
 				}
-				else
+				else//爆発弾じゃないなら
 				{
-					tama_[cnt].IsView = FALSE;
+					tama[cnt].IsView = FALSE;//弾を消す
 				}
 			}
 		}
@@ -602,177 +617,176 @@ VOID SHOT_KYODOU_(VOID)
 				rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Energy];
 				break;
 			case (int)Bomb1:
-				//if (tama_[cnt].countB <= 11)//爆発エフェクト
-				//{
-				//	switch (tama_[cnt].countB)
-				//	{
-				//	case 11:
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb1];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb1];
-				//		break;
-				//	case 10:
-				//		tama_[cnt].shotmode = (int)Bomb2;
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb2];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb2];
-				//		break;
-				//	case 9:
-				//		tama_[cnt].shotmode = (int)Bomb3;
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb3];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb3];
-				//		break;
-				//	case 8:
-				//		tama_[cnt].shotmode = (int)Bomb4;
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb4];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb4];
-				//		break;
-				//	case 7:
-				//		tama_[cnt].shotmode = (int)Bomb5;
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb5];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb5];
-				//		break;
-				//	case 6:
-				//		tama_[cnt].shotmode = (int)Bomb6;
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb6];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb6];
-				//		break;
-				//	case 5:
-				//		tama_[cnt].shotmode = (int)Bomb7;
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb7];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb7];
-				//		break;
-				//	case 4:
-				//		tama_[cnt].shotmode = (int)Bomb8;
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb8];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb8];
-				//		break;
-				//	case 3:
-				//		tama_[cnt].shotmode = (int)Bomb9;
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb9];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb9];
-				//		break;
-				//	case 2:
-				//		tama_[cnt].shotmode = (int)Bomb10;
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb10];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb10];
-				//		break;
-				//	case 1:
-				//		tama_[cnt].shotmode = (int)Bomb11;
-				//		rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Bomb11];
-				//		rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Bomb11];
-				//		break;
-				//	}
-				//}
+				rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[tama_[cnt].BombKind];
+				rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[tama_[cnt].BombKind];
+				break;
+			case (int)Delay:
+				rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Delay];
+				rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Delay];
+				break;
+			case (int)Ycha:
+				rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Ycha];
+				rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Ycha];
+				break;
+			case (int)Xcha:
+				rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Xcha];
+				rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Xcha];
+				break;
+			case (int)Tcha:
+				rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Tcha];
+				rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Tcha];
+				break;
+			case (int)Snipe:
+				rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Snipe];
+				rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Snipe];
+				break;
+			case (int)Stay:
+				rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Stay];
+				rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Stay];
+				break;
+			case (int)Test:
+				rect_tama_.right = tama_[cnt].x + tama_[cnt].Width[(int)Test];
+				rect_tama_.bottom = tama_[cnt].y + tama_[cnt].Height[(int)Test];
 				break;
 			}
-			if (ATARI_HANTEI_(rect_tama_, rect_player_) == TRUE)//弾とプレイヤーが重なったとき
+
+			if (ATARI_HANTEI(rect_tama_, rect_player) == TRUE)//アンダーバー付け替え忘れるな
 			{
-				switch (tama_[cnt].shotmode)
+				//当たった弾を非表示にする
+				tama_[cnt].IsView = FALSE;
+
+				//HPを減らす
+				switch (tama[cnt].shotmode)
 				{
-				case  (int)Laser:	//0
-					tama_[cnt].IsView = FALSE;
-					player_.HP -= 10;
+				case (int)Laser:
+					player.HP -= 10;
 					break;
-				case  (int)Energy:	//1
-					tama_[cnt].IsView = FALSE;
-					player_.HP -= 5;
+				case (int)Energy:
+					player.HP -= 5;
 					break;
-				case  (int)Bomb1:	//2
-					player_.HP -= 15;
-					tama_[cnt].IsView = FALSE;
+				case (int)Bomb1:
 
-				//case (int)Bomb2:
-				//	player_.HP -= 5;
-				//case (int)Bomb3:
-				//	player_.HP -= 5;
-				//case (int)Bomb4:
-				//	player_.HP -= 5;
-				//case (int)Bomb5:
-				//	player_.HP -= 5;
-				//case (int)Bomb6:
-				//	player_.HP -= 5;
-				//case (int)Bomb7:
-				//	player_.HP -= 5;
-				//case (int)Bomb8:
-				//	player_.HP -= 5;
-				//case (int)Bomb9:
-				//	player_.HP -= 5;
-				//case (int)Bomb10:
-				//	player_.HP -= 5;
-				//case (int)Bomb11:
-				//	player_.HP -= 5;
-				//	tama_[cnt].IsView = FALSE;
-				//	break;
-				}
-				if (ATARI_HANTEI_2(rect_tama, rect_player_) == TRUE)//弾とプレイヤーが重なったとき
-				{
-					switch (tama[cnt].shotmode)
-					{
-					case  (int)Laser:	//0
-						tama[cnt].IsView = FALSE;
-						player_.HP -= 10;
-						break;
-					case  (int)Energy:	//1
-						tama[cnt].IsView = FALSE;
-						player_.HP -= 5;
-						break;
-					case  (int)Bomb1:	//2
-						player_.HP -= 15;
-						tama[cnt].IsView = FALSE;
+					break;
+				case (int)Bomb2:
 
-					//case (int)Bomb2:
-					//	player_.HP -= 5;
-					//case (int)Bomb3:
-					//	player_.HP -= 5;
-					//case (int)Bomb4:
-					//	player_.HP -= 5;
-					//case (int)Bomb5:
-					//	player_.HP -= 5;
-					//case (int)Bomb6:
-					//	player_.HP -= 5;
-					//case (int)Bomb7:
-					//	player_.HP -= 5;
-					//case (int)Bomb8:
-					//	player_.HP -= 5;
-					//case (int)Bomb9:
-					//	player_.HP -= 5;
-					//case (int)Bomb10:
-					//	player_.HP -= 5;
-					//case (int)Bomb11:
-					//	player_.HP -= 5;
-					//	tama[cnt].IsView = FALSE;
-					//	break;
-					}
+					break;
+				case (int)Bomb3:
 
-					if (player_.HP <= 0)
-					{
-						//体力が０ならばエンド画面
-						mode = (int)scene_end;
-						player_.HP = 100;
-					}
+					break;
+				case (int)Bomb4:
+
+					break;
+				case (int)Bomb5:
+
+					break;
+				case (int)Bomb6:
+
+					break;
+				case (int)Bomb7:
+
+					break;
+				case (int)Bomb8:
+
+					break;
+				case (int)Bomb9:
+
+					break;
+				case (int)Bomb10:
+
+					break;
+				case (int)Bomb11:
+
+					break;
+				case (int)Delay:
+
+					break;
+				case (int)Ycha:
+
+					break;
+				case (int)Xcha:
+
+					break;
+				case (int)XchaLu:
+
+					break;
+				case (int)XchaLd:
+
+					break;
+				case (int)XchaRu:
+
+					break;
+				case (int)XchaRd:
+
+					break;
+				case (int)Tcha:
+
+					break;
+				case (int)Snipe:
+
+					break;
+				case (int)Stay:
+
+					break;
+
 				}
 			}
+
+			if (player_.HP <= 0)
+			{
+				//体力が０ならばエンド画面
+				mode = (int)scene_end;
+				player_.HP = 100;
+			}
+				
 		}
 	}
 }
+//##################当たり判定の関数*########################
+BOOL ATARI_HANTEI_(RECT tama, RECT player_)//()の中はこの構造体の変数を使うよ、的な 
+{
+	if (tama.left < player_.right &&
+		tama.top < player_.bottom &&
+		tama.right > player_.left &&
+		tama.bottom > player_.top)
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+
 //##################画像読み込み関数*########################
 VOID GAZOU_YOMIKOMI_(VOID)
 {
 	//####################画像読み込み#############################
 	player_.Handle = LoadGraph("画像/キャラクタ02.png"); // プレイヤー画像のロード
-	tama_init_.handle[(int)Laser] = LoadGraph("画像/赤レーザー.png");
-	tama_init_.handle[(int)Energy] = LoadGraph("画像/赤強弾.png");
-	//tama_init_.handle[(int)Redtama3] = LoadGraph("画像/赤三角弾.png");
+	tama_init_.handle[(int)Laser] = LoadGraph("画像/弾/赤レーザー.png");
+	tama_init_.handle[(int)Energy] = LoadGraph("画像/弾/赤強弾.png");
 	tama_init_.handle[(int)Bomb1] = LoadGraph("画像/青爆発/青爆発1.png");
-	//tama_init_.handle[(int)Bomb2] = LoadGraph("画像/青爆発/青爆発2.png");
-	//tama_init_.handle[(int)Bomb3] = LoadGraph("画像/青爆発/青爆発3.png");
-	//tama_init_.handle[(int)Bomb4] = LoadGraph("画像/青爆発/青爆発4.png");
-	//tama_init_.handle[(int)Bomb5] = LoadGraph("画像/青爆発/青爆発5.png");
-	//tama_init_.handle[(int)Bomb6] = LoadGraph("画像/青爆発/青爆発6.png");
-	//tama_init_.handle[(int)Bomb7] = LoadGraph("画像/青爆発/青爆発7.png");
-	//tama_init_.handle[(int)Bomb8] = LoadGraph("画像/青爆発/青爆発8.png");
-	//tama_init_.handle[(int)Bomb9] = LoadGraph("画像/青爆発/青爆発9.png");
-	//tama_init_.handle[(int)Bomb10] = LoadGraph("画像/青爆発/青爆発10.png");
-	//tama_init_.handle[(int)Bomb11] = LoadGraph("画像/青爆発/青爆発11.png");
+	tama_init_.handle[(int)Bomb2] = LoadGraph("画像/青爆発/青爆発2.png");
+	tama_init_.handle[(int)Bomb3] = LoadGraph("画像/青爆発/青爆発3.png");
+	tama_init_.handle[(int)Bomb4] = LoadGraph("画像/青爆発/青爆発4.png");
+	tama_init_.handle[(int)Bomb5] = LoadGraph("画像/青爆発/青爆発5.png");
+	tama_init_.handle[(int)Bomb6] = LoadGraph("画像/青爆発/青爆発6.png");
+	tama_init_.handle[(int)Bomb7] = LoadGraph("画像/青爆発/青爆発7.png");
+	tama_init_.handle[(int)Bomb8] = LoadGraph("画像/青爆発/青爆発8.png");
+	tama_init_.handle[(int)Bomb9] = LoadGraph("画像/青爆発/青爆発9.png");
+	tama_init_.handle[(int)Bomb10] = LoadGraph("画像/青爆発/青爆発10.png");
+	tama_init_.handle[(int)Bomb11] = LoadGraph("画像/青爆発/青爆発11.png");
+	tama_init_.handle[(int)Delay] = LoadGraph("画像/弾/桃レーザー.png");
+	tama_init_.handle[(int)Ycha] = LoadGraph("画像/弾/赤三角弾.png");
+	tama_init_.handle[(int)Xcha] = LoadGraph("画像/弾/X弾.png");
+			 
+	tama_init_.handle[(int)XchaLu] = LoadGraph("画像/弾/赤三角弾.png");
+	tama_init_.handle[(int)XchaLd] = LoadGraph("画像/弾/赤三角弾.png");
+	tama_init_.handle[(int)XchaRu] = LoadGraph("画像/弾/赤三角弾.png");
+	tama_init_.handle[(int)XchaRd] = LoadGraph("画像/弾/赤三角弾.png");
+			 
+	tama_init_.handle[(int)Tcha] = LoadGraph("画像/弾/＋弾.png");
+	tama_init_.handle[(int)Snipe] = LoadGraph("画像/弾/Snipe弾.png");
+			 
+	tama_init_.handle[(int)Stay] = LoadGraph("画像/弾/Stay弾.png");
+			 
+	tama_init_.handle[(int)Test] = LoadGraph("画像/青爆発/青爆発11.png");
 	lockon.Handle[(int)lockon1] = LoadGraph("画像/ロックオン/ロックオン1.jpg");
 	lockon.Handle[(int)lockon2] = LoadGraph("画像/ロックオン/ロックオン2.jpg");
 	lockon.Handle[(int)lockon3] = LoadGraph("画像/ロックオン/ロックオン3.jpg");
@@ -787,21 +801,29 @@ VOID GAZOU_YOMIKOMI_(VOID)
 	GetGraphSize(player_.Handle, &player_.Width, &player_.Height);
 	GetGraphSize(tama_init_.handle[(int)Laser], &tama_init_.Width[(int)Laser], &tama_init_.Height[(int)Laser]);
 	GetGraphSize(tama_init_.handle[(int)Energy], &tama_init_.Width[(int)Energy], &tama_init_.Height[(int)Energy]);
-	//GetGraphSize(tama_init_.handle[(int)Redtama3], &tama_init_.Width[(int)Redtama3], &tama_init_.Height[(int)Redtama3]);
 	GetGraphSize(tama_init_.handle[(int)Bomb1], &tama_init_.Width[(int)Bomb1], &tama_init_.Height[(int)Bomb1]);
-	//GetGraphSize(tama_init_.handle[(int)Bomb2], &tama_init_.Width[(int)Bomb2], &tama_init_.Height[(int)Bomb2]);
-	//GetGraphSize(tama_init_.handle[(int)Bomb3], &tama_init_.Width[(int)Bomb3], &tama_init_.Height[(int)Bomb3]);
-	//GetGraphSize(tama_init_.handle[(int)Bomb4], &tama_init_.Width[(int)Bomb4], &tama_init_.Height[(int)Bomb4]);
-	//GetGraphSize(tama_init_.handle[(int)Bomb5], &tama_init_.Width[(int)Bomb5], &tama_init_.Height[(int)Bomb5]);
-	//GetGraphSize(tama_init_.handle[(int)Bomb6], &tama_init_.Width[(int)Bomb6], &tama_init_.Height[(int)Bomb6]);
-	//GetGraphSize(tama_init_.handle[(int)Bomb7], &tama_init_.Width[(int)Bomb7], &tama_init_.Height[(int)Bomb7]);
-	//GetGraphSize(tama_init_.handle[(int)Bomb8], &tama_init_.Width[(int)Bomb8], &tama_init_.Height[(int)Bomb8]);
-	//GetGraphSize(tama_init_.handle[(int)Bomb9], &tama_init_.Width[(int)Bomb9], &tama_init_.Height[(int)Bomb9]);
-	//GetGraphSize(tama_init_.handle[(int)Bomb10], &tama_init_.Width[(int)Bomb10], &tama_init_.Height[(int)Bomb10]);
-	//GetGraphSize(tama_init_.handle[(int)Bomb11], &tama_init_.Width[(int)Bomb11], &tama_init_.Height[(int)Bomb11]);
-	//	GetGraphSize(lockon_.Handle[(int)lockon_1],&lockon_.Width[(int)lockon_1],&lockon_.Height[(int)lockon_1]);当たり判定考えないし画像サイズ取る必要なし
-	//  GetGraphSize(lockon_.Handle[(int)lockon_2], &lockon_.Width[(int)lockon_2], &lockon_.Height[(int)lockon_2]);
-	//	GetGraphSize(lockon_.Handle[(int)lockon_3], &lockon_.Width[(int)lockon_3], &lockon_.Height[(int)lockon_3]);
+	GetGraphSize(tama_init_.handle[(int)Bomb2], &tama_init_.Width[(int)Bomb2], &tama_init_.Height[(int)Bomb2]);
+	GetGraphSize(tama_init_.handle[(int)Bomb3], &tama_init_.Width[(int)Bomb3], &tama_init_.Height[(int)Bomb3]);
+	GetGraphSize(tama_init_.handle[(int)Bomb4], &tama_init_.Width[(int)Bomb4], &tama_init_.Height[(int)Bomb4]);
+	GetGraphSize(tama_init_.handle[(int)Bomb5], &tama_init_.Width[(int)Bomb5], &tama_init_.Height[(int)Bomb5]);
+	GetGraphSize(tama_init_.handle[(int)Bomb6], &tama_init_.Width[(int)Bomb6], &tama_init_.Height[(int)Bomb6]);
+	GetGraphSize(tama_init_.handle[(int)Bomb7], &tama_init_.Width[(int)Bomb7], &tama_init_.Height[(int)Bomb7]);
+	GetGraphSize(tama_init_.handle[(int)Bomb8], &tama_init_.Width[(int)Bomb8], &tama_init_.Height[(int)Bomb8]);
+	GetGraphSize(tama_init_.handle[(int)Bomb9], &tama_init_.Width[(int)Bomb9], &tama_init_.Height[(int)Bomb9]);
+	GetGraphSize(tama_init_.handle[(int)Bomb10], &tama_init_.Width[(int)Bomb10], &tama_init_.Height[(int)Bomb10]);
+	GetGraphSize(tama_init_.handle[(int)Bomb11], &tama_init_.Width[(int)Bomb11], &tama_init_.Height[(int)Bomb11]);
+	GetGraphSize(tama_init_.handle[(int)Delay], &tama_init_.Width[(int)Delay], &tama_init_.Height[(int)Delay]);
+	GetGraphSize(tama_init_.handle[(int)Ycha], &tama_init_.Width[(int)Ycha], &tama_init_.Height[(int)Ycha]);
+	GetGraphSize(tama_init_.handle[(int)Xcha], &tama_init_.Width[(int)Xcha], &tama_init_.Height[(int)Xcha]);
+						  
+	GetGraphSize(tama_init_.handle[(int)XchaLu], &tama_init_.Width[(int)XchaLu], &tama_init_.Height[(int)XchaLu]);
+	GetGraphSize(tama_init_.handle[(int)XchaLd], &tama_init_.Width[(int)XchaLd], &tama_init_.Height[(int)XchaLd]);
+	GetGraphSize(tama_init_.handle[(int)XchaRu], &tama_init_.Width[(int)XchaRu], &tama_init_.Height[(int)XchaRu]);
+	GetGraphSize(tama_init_.handle[(int)XchaRd], &tama_init_.Width[(int)XchaRd], &tama_init_.Height[(int)XchaRd]);
+						  
+	GetGraphSize(tama_init_.handle[(int)Tcha], &tama_init_.Width[(int)Tcha], &tama_init_.Height[(int)Tcha]);
+	GetGraphSize(tama_init_.handle[(int)Snipe], &tama_init_.Width[(int)Snipe], &tama_init_.Height[(int)Snipe]);
+	GetGraphSize(tama_init_.handle[(int)Stay], &tama_init_.Width[(int)Stay], &tama_init_.Height[(int)Stay]);
 
 		//弾の初期化情報を基に、２５６個の弾に情報をコピー
 	for (int cnt = 0; cnt < TAMA_MAX; cnt++)
@@ -821,29 +843,6 @@ VOID PLAYER_HYOUJI_(VOID)
 		DrawGraph(player_.x, player_.y, player_.Handle, TRUE);
 	}
 }
-//##################当たり判定の関数*########################
-BOOL ATARI_HANTEI_(RECT tama_, RECT player_)//()の中はこの構造体の変数を使うよ、的な 
-{
-	if (tama_.left < player_.right &&
-		tama_.top < player_.bottom &&
-		tama_.right > player_.left &&
-		tama_.bottom > player_.top)
-	{
-		return TRUE;
-	}
-	return FALSE;
-}//BOOL関数はVOIDとは使いどころが違うみたい
-BOOL ATARI_HANTEI_2(RECT tama, RECT player_)//()の中はこの構造体の変数を使うよ、的な 
-{
-	if (tama.left < player_.right &&
-		tama.top < player_.bottom &&
-		tama.right > player_.left &&
-		tama.bottom > player_.top)
-	{
-		return TRUE;
-	}
-	return FALSE;
-}//BOOL関数はVOIDとは使いどころが違うみたい
 
 //青い弾の爆発描画
 VOID BLUE_BOMB(TAMA_ *t)
@@ -853,22 +852,179 @@ VOID BLUE_BOMB(TAMA_ *t)
 	int bakuY = t->y - t->Height[t->BombKind] / 2;
 
 	//爆発の画像を描画
-	DrawGraph(bakuX, bakuY, t->handle[t->BombKind], TRUE);
 
-	//爆発のアニメーション処理
-	if (t->BombCnt < t->BombCntMax)
+	if (t->x < 100)
 	{
-		t->BombCnt++;
+		DrawGraph(bakuX, bakuY, t->handle[t->BombKind], TRUE);
+
+		//爆発のアニメーション処理
+		if (t->BombCnt < t->BombCntMax)
+		{
+			t->BombCnt++;
+		}
+		else
+		{
+			t->BombCnt = 0;
+
+			if (t->BombKind < t->BombKindMax)
+			{
+				t->BombKind++;	//次の爆発画像へ
+			}
+		}
 	}
 	else
 	{
-		t->BombCnt = 0;
-
-		if (t->BombKind < t->BombKindMax)
-		{
-			t->BombKind++;	//次の爆発画像へ
-		}
+		DrawGraph(t->x, t->y - 3, t->handle[t->BombKind], TRUE); // x,y の位置にキャラを描画
 	}
 
 	return;
+}
+VOID DELAY(TAMA_* t)
+{
+	if (t->PinkCnt == t->PinkCntMax)
+	{
+		t->Pinkdansoku = t->dansoku;//弾速を一時退避させて保管する
+		t->dansoku = 0;//弾速をなくす
+	}
+
+	if (t->PinkCnt > 0)//カウントが０じゃないなら
+	{
+		DrawGraph(t->x, t->y - 3, t->handle[(int)Delay], TRUE); //弾を表示して
+		t->PinkCnt--;//カウントを減らす
+	}
+	else//０になったら
+	{
+		t->dansoku = t->Pinkdansoku;//保管していた弾速を元に戻して弾を動かす
+		DrawGraph(t->x, t->y - 3, t->handle[(int)Delay], TRUE);
+	}
+}
+VOID YCHA(TAMA_* t)
+{
+
+	if (t->x < 250)
+	{
+		DrawGraph(t->x, t->Ly, t->handle[(int)Ycha], TRUE); //弾を表示して
+		t->Ly--;
+		DrawGraph(t->x, t->Ry, t->handle[(int)Ycha], TRUE); //弾を表示して
+		t->Ry++;
+	}
+	else
+	{
+		DrawGraph(t->x, t->y - 3, t->handle[(int)Ycha], TRUE); //弾を表示して
+		t->Ly = t->y;
+		t->Ry = t->y;
+	}
+}
+VOID XCHA(TAMA_* t)
+{
+	if (t->Same == TRUE)
+	{
+		DrawGraph(t->Lu, t->Ly, t->handle[(int)XchaLu], TRUE); //弾を表示して
+		t->Lu++;
+		DrawGraph(t->Ru, t->Ry, t->handle[(int)XchaRu], TRUE); //弾を表示して
+		t->Ru++;
+		DrawGraph(t->Ld, t->Ly, t->handle[(int)XchaLd], TRUE); //弾を表示して
+		t->Ld--;
+		DrawGraph(t->Rd, t->Ry, t->handle[(int)XchaLd], TRUE); //弾を表示して
+		t->Rd--;
+
+		t->Ly -= 2;
+		t->Ry += 2;
+	}
+	else
+	{
+		DrawGraph(t->x, t->y - 3, t->handle[(int)XchaLu], TRUE); //弾を表示して
+		DrawGraph(t->x, t->y - 3, t->handle[(int)XchaLd], TRUE); //弾を表示して
+		DrawGraph(t->x, t->y - 3, t->handle[(int)XchaRu], TRUE); //弾を表示して
+		DrawGraph(t->x, t->y - 3, t->handle[(int)XchaRd], TRUE); //弾を表示して
+
+		if (t->x <= player_.x)
+		{
+			t->Same = TRUE;
+		}
+		if (t->Same == TRUE)
+		{
+			t->dansoku = 2;
+
+			t->Lu = t->x;
+			t->Ru = t->x;
+			t->Ld = t->x;
+			t->Rd = t->x;
+
+			t->Ly = t->y;
+			t->Ry = t->y;
+		}
+	}
+}
+VOID TCHA(TAMA_* t)
+{
+	if (t->Same == TRUE)
+	{
+		DrawGraph(t->x, t->Ly, t->handle[(int)Tcha], TRUE); //弾を表示して
+		t->Ly--;
+		DrawGraph(t->x, t->Ry, t->handle[(int)Tcha], TRUE); //弾を表示して
+		t->Ry++;
+	}
+	else
+	{
+		DrawGraph(t->x, t->y - 3, t->handle[(int)Tcha], TRUE); //弾を表示して
+		if (t->x <= player_.x)
+		{
+			t->Same = TRUE;
+		}
+		if (t->Same == TRUE)
+		{
+			t->dansoku = 0;
+			t->Ly = t->y;
+			t->Ry = t->y;
+		}
+	}
+}
+VOID SNIPE(TAMA_* t)
+{
+	if (t->Snipe == FALSE)
+	{
+		t->dansoku = 0;
+		t->SnX = t->x - player_.x;
+		t->SnY = t->y - player_.y;
+		t->Snipe = TRUE;
+	}
+	else
+	{
+		DrawGraph(t->x, t->y, t->handle[(int)Snipe], TRUE); //弾を表示して
+		t->x -= t->SnX / 50;
+		t->y -= t->SnY / 50;
+	}
+
+}
+VOID STAY(TAMA_* t)
+{
+	if (t->Same == TRUE)
+	{
+		if (t->stay > 0)
+		{
+			DrawGraph(t->x, t->Ly, t->handle[(int)Stay], TRUE); //弾を表示して
+			t->stay--;
+		}
+	}
+	else
+	{
+		DrawGraph(t->x, t->y - 3, t->handle[(int)Stay], TRUE); //弾を表示して
+		if (t->x <= player_.x)
+		{
+			t->Same = TRUE;
+		}
+		if (t->Same == TRUE)
+		{
+			t->dansoku = 0;
+			t->Ly = t->y;
+			t->Ry = t->y;
+		}
+	}
+
+}
+VOID TEST(TAMA_* t)
+{
+	DrawGraph(t->x, t->y - 3, t->handle[(int)Test], TRUE); //弾を表示して
+
 }
